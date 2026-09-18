@@ -21,14 +21,14 @@
         .action-btn { background: #2e6930; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: bold; width: 100%; margin-top: 8px; cursor: pointer; }
         .back-btn { background: #555; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 8px; align-self: flex-start; }
         .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
-        .admin-panel { background: rgba(155, 114, 207, 0.15); border: 2px dashed #9b72cf; padding: 10px; border-radius: 12px; margin-bottom: 10px; }
+        .admin-panel { background: rgba(155, 114, 207, 0.15); border: 2px dashed #9b72cf; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <div class="phone-frame">
-    <div id="user-display" class="user-badge" onclick="switchUser()">אופק</div>
+    <div id="user-display" class="user-badge" onclick="switchUser()">התחבר</div>
 
     <!-- Screen 1: Main Menu -->
     <div id="screen-main" class="content-area">
@@ -37,7 +37,7 @@
             <h1 style="font-size: 21px; color: #9b72cf;">לבד בבית!!</h1>
             <h2 style="font-size: 14px; color: #ccc; font-weight: 400;">משפחת ברמי</h2>
         </div>
-        <div id="welcome-msg" style="text-align: center; font-size: 15px; font-weight: bold;">שלום אופק!</div>
+        <div id="welcome-msg" style="text-align: center; font-size: 15px; font-weight: bold;">אנא הזדהה בכניסה</div>
         
         <div style="display: flex; flex-direction: column; gap: 9px; margin-top: 5px;">
             <button class="menu-btn" onclick="showScreen('screen-tasks')">📋 משימות ותורנויות</button>
@@ -55,22 +55,28 @@
         <div class="screen-title">משימות ותורנויות יומיות</div>
         
         <div id="admin-task-box" class="admin-panel hidden">
-            <h4>שבוץ משימות יומיות (מנהל):</h4>
-            <input type="text" id="new-task-text" class="input-box" placeholder="תוכן המשימה">
+            <h4>פאנל ניהול משימות (אופק בלבד):</h4>
+            <input type="date" id="task-date-input" class="input-box">
+            <input type="text" id="new-task-text" class="input-box" placeholder="תוכן המשימה (למשל: לנקות שיש)">
             <select id="new-task-user" class="input-box">
                 <option value="אופק">אופק</option>
-                <option value="טל">טל</option>
-                <option value="נאור">נאור</option>
-                <option value="רביב">רביב</option>
                 <option value="שחר">שחר</option>
+                <option value="רביב">רביב</option>
                 <option value="סהר">סהר</option>
+                <option value="אבא / נאור">אבא / נאור</option>
+                <option value="אמא / טל">אמא / טל</option>
             </select>
-            <button class="action-btn" onclick="addNewTask()">שבץ משימה</button>
+            <button class="action-btn" onclick="addNewTask()">הקצה משימה לתאריך</button>
         </div>
 
         <div class="card">
-            <h3>המשימות להיום:</h3>
-            <div id="tasks-list" style="margin-top: 8px;">טוען משימות...</div>
+            <p>בחר תאריך לצפייה במשימות:</p>
+            <input type="date" id="filter-task-date" class="input-box" onchange="loadTasksForDate()">
+        </div>
+
+        <div class="card">
+            <h3>המשימות:</h3>
+            <div id="tasks-list" style="margin-top: 8px;">בחר תאריך לצפייה...</div>
         </div>
     </div>
 
@@ -127,13 +133,12 @@
             <p>הזמנת סנדוויצ'ים להיום:</p>
             <input type="number" id="sandwich-count" class="input-box" placeholder="כמות סנדוויצ'ים (למשל 2)" min="1" max="5" oninput="renderSandwichInputs()">
             <div id="sandwich-details-container" style="margin-top: 8px;"></div>
-            <input type="text" id="sandwich-free" class="input-box" placeholder="הערה / בקשה חופשית לסנדוויץ">
             <button class="action-btn" onclick="saveSandwiches()">שמור הזמנת סנדוויצ'ים</button>
         </div>
         <div class="card" style="margin-top: 10px;">
             <p>בקשות מיוחדות לאוכל השבוע:</p>
             <input type="date" id="food-special-date" class="input-box">
-            <input type="text" id="food-special-desc" class="input-box" placeholder="למשל: שניצל">
+            <input type="text" id="food-special-desc" class="input-box" placeholder="למשל: שניצל ביום חמישי">
             <button class="action-btn" onclick="saveSpecialFood()">הוסף בקשה מיוחדת</button>
         </div>
         <div class="card">
@@ -153,7 +158,7 @@
             
             <div style="margin-top: 10px;">
                 <h4>הוסף פעילויות להיום:</h4>
-                <input type="text" id="sched-desc" class="input-box" placeholder="למשל: עבודה, חוג">
+                <input type="text" id="sched-desc" class="input-box" placeholder="למשל: עבודה עד 16:00, חוג בערב">
                 <button class="action-btn" onclick="saveMySchedule()">הוסף פעילויות ללו"ז שלי</button>
             </div>
         </div>
@@ -182,78 +187,118 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let currentUser = localStorage.getItem('barmi_user') || "אופק";
-    document.getElementById('user-display').innerText = currentUser;
-    document.getElementById('welcome-msg').innerText = "שלום " + currentUser + "!";
-    if(currentUser === "אופק") {
-        document.getElementById('admin-task-box').classList.remove('hidden');
+    // Exact passwords mapping
+    const userPasswords = {
+        "אופק": "2710",
+        "שחר": "1708",
+        "רביב": "0812",
+        "סהר": "1111",
+        "אבא / נאור": "1105",
+        "אמא / טל": "0309"
+    };
+
+    let currentUser = localStorage.getItem('barmi_user') || "";
+    let currentPass = localStorage.getItem('barmi_pass') || "";
+
+    function checkAuth() {
+        if (!currentUser || !userPasswords[currentUser] || userPasswords[currentUser] !== currentPass) {
+            switchUser();
+        } else {
+            initUserSession();
+        }
     }
 
     window.switchUser = function() {
-        let name = prompt("בחר משתמש:\nאופק, טל, נאור, רביב, שחר, סהר", currentUser);
-        if(name) {
+        let name = prompt("הכנס שם משתמש (אופק, שחר, רביב, סהר, אבא / נאור, אמא / טל):", "אופק");
+        if (!name || !userPasswords[name]) {
+            alert('שם משתמש לא שגוי או לא קיים');
+            return switchUser();
+        }
+        let pass = prompt(`הכנס סיסמא עבור ${name}:`);
+        if (pass === userPasswords[name]) {
             currentUser = name;
+            currentPass = pass;
             localStorage.setItem('barmi_user', currentUser);
-            document.getElementById('user-display').innerText = currentUser;
-            document.getElementById('welcome-msg').innerText = "שלום " + currentUser + "!";
-            if(currentUser === "אופק") {
-                document.getElementById('admin-task-box').classList.remove('hidden');
-            } else {
-                document.getElementById('admin-task-box').classList.add('hidden');
-            }
+            localStorage.setItem('barmi_pass', currentPass);
+            initUserSession();
+        } else {
+            alert('סיסמא שגויה!');
+            switchUser();
         }
     }
+
+    function initUserSession() {
+        document.getElementById('user-display').innerText = currentUser;
+        document.getElementById('welcome-msg').innerText = "שלום " + currentUser + "!";
+        if(currentUser === "אופק") {
+            document.getElementById('admin-task-box').classList.remove('hidden');
+        } else {
+            document.getElementById('admin-task-box').classList.add('hidden');
+        }
+        if ("Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+    }
+
+    checkAuth();
 
     window.showScreen = function(screenId) {
         document.querySelectorAll('.content-area').forEach(el => el.classList.add('hidden'));
         document.getElementById(screenId).classList.remove('hidden');
     }
 
-    onSnapshot(collection(db, "tasks"), (snapshot) => {
+    // 1. Tasks Panel
+    window.loadTasksForDate = async function() {
+        const selectedDate = document.getElementById('filter-task-date').value;
+        if(!selectedDate) return;
+        const snapshot = await getDocs(collection(db, "tasks"));
         let html = "";
-        let todayStr = new Date().toISOString().slice(0, 10);
         snapshot.forEach((docSnap) => {
             let data = docSnap.data();
             let docId = docSnap.id;
-            if(data.date && data.date !== todayStr) {
-                deleteDoc(doc(db, "tasks", docId));
-                return;
-            }
-            if(currentUser === "אופק" || data.assignedTo === currentUser) {
-                html += `<div class="item-row">
-                    <span><b>[${data.assignedTo}]</b> ${data.text}</span> 
-                    <span>
-                        ${data.done ? '✅ בוצע' : `<button onclick="toggleTask('${docId}', true)" style="background:#2e6930;color:white;border:none;padding:4px 8px;border-radius:5px;cursor:pointer;">סמן בוצע</button>`}
-                    </span>
-                </div>`;
+            if(data.date === selectedDate) {
+                if(currentUser === "אופק" || data.assignedTo === currentUser) {
+                    html += `<div class="item-row">
+                        <span><b>[${data.assignedTo}]</b> ${data.text}</span> 
+                        <span>
+                            ${data.done ? '✅ בוצע' : `<button onclick="toggleTask('${docId}')" style="background:#2e6930;color:white;border:none;padding:4px 8px;border-radius:5px;cursor:pointer;">סמן בוצע</button>`}
+                        </span>
+                    </div>`;
+                }
             }
         });
-        document.getElementById('tasks-list').innerHTML = html || "אין מטלות להיום.";
-    });
+        document.getElementById('tasks-list').innerHTML = html || "אין מטלות לתאריך זה.";
+    }
 
     window.addNewTask = async function() {
+        const date = document.getElementById('task-date-input').value;
         const text = document.getElementById('new-task-text').value;
         const assignedTo = document.getElementById('new-task-user').value;
-        if(!text) return alert('נא למלא את תוכן המשימה');
-        const todayStr = new Date().toISOString().slice(0, 10);
-        await addDoc(collection(db, "tasks"), { text, assignedTo, done: false, date: todayStr });
+        if(!date || !text) return alert('נא לבחור תאריך ולרשום משימה');
+        await addDoc(collection(db, "tasks"), { text, assignedTo, date, done: false });
         document.getElementById('new-task-text').value = "";
-        alert('המשימה שובצה בהצלחה להיום!');
+        alert('המשימה שובצה בהצלחה!');
+        loadTasksForDate();
     }
 
-    window.toggleTask = async function(id, status) {
-        await updateDoc(doc(db, "tasks", id), { done: status });
+    window.toggleTask = async function(id) {
+        await updateDoc(doc(db, "tasks", id), { done: true });
+        loadTasksForDate();
     }
 
+    // 2. Rides Listener & Restrictions (Raviv & Sahar cannot pick)
     onSnapshot(collection(db, "rides"), (snapshot) => {
         let html = "";
         snapshot.forEach((docSnap) => {
             let data = docSnap.data();
             let docId = docSnap.id;
+            
+            let canPick = (currentUser !== "רביב" && currentUser !== "סהר");
+
             html += `<div class="item-row">
                 <span>🚗 <b>${data.requestedBy}:</b> ${data.message} <br><small>סטטוס: ${data.status}</small></span>
                 <div>
-                    ${data.status === 'ממתין לנהג' ? `<button onclick="takeRide('${docId}')" style="background:#2e6930;color:white;border:none;padding:4px 8px;border-radius:5px;cursor:pointer;margin-left:4px;">אני אאסוף!</button>` : ''}
+                    ${(data.status === 'ממתין לנהג' && canPick) ? `<button onclick="takeRide('${docId}')" style="background:#2e6930;color:white;border:none;padding:4px 8px;border-radius:5px;cursor:pointer;margin-left:4px;">אני אאסוף!</button>` : ''}
                     <button onclick="finishRide('${docId}')" style="background:#a93226;color:white;border:none;padding:4px 8px;border-radius:5px;cursor:pointer;">בוצע</button>
                 </div>
             </div>`;
@@ -266,6 +311,10 @@
         if(!message) return alert('נא לרשום את פרטי ההסעה');
         await addDoc(collection(db, "rides"), { message, status: 'ממתין לנהג', requestedBy: currentUser });
         document.getElementById('ride-input').value = "";
+        
+        if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("הודעת הסעה חדשה!", { body: `${currentUser} ביקש/ה הסעה: ${message}` });
+        }
         alert('בקשת ההסעה נשלחה!');
     }
 
@@ -275,9 +324,10 @@
 
     window.finishRide = async function(id) {
         await deleteDoc(doc(db, "rides", id));
-        alert('הבקשה טופלה והוסרה!');
+        alert('הנסיעה הושלמה והוסרה!');
     }
 
+    // 3. Shopping Lists
     onSnapshot(collection(db, "shopping_daily"), (snapshot) => {
         let html = "";
         snapshot.forEach((docSnap) => {
@@ -315,34 +365,41 @@
         alert('הרישיון אופס!');
     }
 
+    // 4. Sandwiches with Free Choice checkboxes
     window.renderSandwichInputs = function() {
         const count = parseInt(document.getElementById('sandwich-count').value) || 0;
         let container = document.getElementById('sandwich-details-container');
         container.innerHTML = "";
         for(let i = 1; i <= count; i++) {
-            container.innerHTML += `<input type="text" id="sandwich_filling_${i}" class="input-box" placeholder="מילוי סנדוויץ ${i}">`;
+            container.innerHTML += `
+                <div style="margin-top:6px; background:rgba(0,0,0,0.1); padding:8px; border-radius:8px;">
+                    <label>סנדוויץ' ${i}:</label>
+                    <input type="text" id="sandwich_filling_${i}" class="input-box" placeholder="מה לשים במילוי?">
+                    <label style="font-size:12px; margin-top:4px; display:block;">
+                        <input type="checkbox" id="sandwich_free_${i}"> לא משנה לי מה יהיה בסנדוויץ' (בחירה חופשית)
+                    </label>
+                </div>`;
         }
     }
 
     window.saveSandwiches = async function() {
         const count = document.getElementById('sandwich-count').value;
         if(count === "") return alert('נא לרשום כמות');
-        let fillings = [];
+        let details = [];
         for(let i = 1; i <= Number(count); i++) {
             let fill = document.getElementById(`sandwich_filling_${i}`)?.value || "רגיל";
-            fillings.push(fill);
+            let isFree = document.getElementById(`sandwich_free_${i}`)?.checked || false;
+            details.push({ filling: fill, freeChoice: isFree });
         }
-        const freeNote = document.getElementById('sandwich-free').value;
         const todayStr = new Date().toISOString().slice(0, 10);
         
         await setDoc(doc(db, "sandwiches", `${todayStr}_${currentUser}`), { 
             user: currentUser, 
             count: Number(count), 
-            fillings, 
-            freeNote, 
+            details, 
             date: todayStr 
         });
-        alert('הזמנת הסנדוויצ׳ים נשמרה!');
+        alert('הזמנת הסנדוויצ׳ים נשמרה בהצלחה!');
         loadSandwichesList();
     }
 
@@ -363,7 +420,8 @@
         snapshot.forEach((docSnap) => {
             let data = docSnap.data();
             if(data.date === todayStr) {
-                html += `<div>• ${data.user}: ${data.count} סנדוויצ'ים (מילויים: ${data.fillings.join(', ')} | הערה: ${data.freeNote || 'אין'})</div>`;
+                let fillText = data.details.map((d, idx) => `סנדוויץ ${idx+1}: ${d.freeChoice ? 'בחירה חופשית' : d.filling}`).join(' | ');
+                html += `<div>• ${data.user}: ${data.count} סנדוויצ'ים (${fillText})</div>`;
                 hasData = true;
             }
         });
@@ -393,6 +451,7 @@
         loadSandwichesList();
     }
 
+    // 5. Schedule
     window.saveMySchedule = async function() {
         const date = document.getElementById('schedule-date').value;
         const desc = document.getElementById('sched-desc').value;
