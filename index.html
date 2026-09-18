@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הבית של משפחת ברמי</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Heebo', sans-serif; }
+        body { background-color: #2b2b2b; color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; background-image: linear-gradient(135deg, #2b2b2b 0%, #1a1a1a 100%); }
+        .phone-frame { width: 100%; max-width: 420px; height: 100vh; max-height: 850px; background: linear-gradient(to bottom, #3a4a58 0%, #2b2b2b 40%); border-radius: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); display: flex; flex-direction: column; position: relative; overflow: hidden; border: 4px solid #4a5a68; }
+        .logo-area { display: flex; flex-direction: column; align-items: center; width: 100%; padding-top: 10px; }
+        .logo-icon { width: 70px; height: 70px; background: #9b72cf; border-radius: 20px; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(155,114,207,0.4); margin-bottom: 8px; font-size: 30px; }
+        .user-badge { background: #9b72cf; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; position: absolute; top: 20px; left: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 10; }
+        .content-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .screen-title { font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 10px; background: #9b72cf; padding: 10px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .menu-btn { background: #9b72cf; color: white; border: none; padding: 14px; border-radius: 15px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .menu-btn:hover { background: #8a5fb8; transform: translateY(-2px); }
+        .card { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .input-box { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #2e6930; background: white; color: #000; font-size: 15px; margin-top: 6px; outline: none; }
+        .action-btn { background: #2e6930; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 15px; font-weight: bold; width: 100%; margin-top: 8px; cursor: pointer; }
+        .back-btn { background: #555; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 8px; align-self: flex-start; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 6px; font-size: 14px; }
+        .admin-panel { background: rgba(155, 114, 207, 0.15); border: 2px dashed #9b72cf; padding: 10px; border-radius: 12px; margin-bottom: 10px; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame">
+    <div id="user-display" class="user-badge" onclick="switchUser()">אופק</div>
+
+    <!-- Screen 1: Main Menu -->
+    <div id="screen-main" class="content-area">
+        <div class="logo-area">
+            <div class="logo-icon">🏠</div>
+            <h1 style="font-size: 20px; color: #9b72cf;">הבית של משפחת ברמי</h1>
+        </div>
+        <div id="welcome-msg" style="text-align: center; font-size: 16px; font-weight: bold;">שלום אופק!</div>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 5px;">
+            <button class="menu-btn" onclick="showScreen('screen-tasks')">📋 מורשיות ותורנויות</button>
+            <button class="menu-btn" onclick="showScreen('screen-rides')">🚗 הנהג של מיס דייזי</button>
+            <button class="menu-btn" onclick="showScreen('screen-shopping-daily')">🛒 קניות להיום (יומי)</button>
+            <button class="menu-btn" onclick="showScreen('screen-shopping-weekly')">📦 רשימת קניות שבועית</button>
+            <button class="menu-btn" onclick="showScreen('screen-food')">🥪 סנדוויצ'ים להיום</button>
+            <button class="menu-btn" onclick="showScreen('screen-schedule')">📅 לו"ז יומי משפחתי</button>
+        </div>
+    </div>
+
+    <!-- Screen 2: Tasks -->
+    <div id="screen-tasks" class="content-area hidden">
+        <button class="back-btn" onclick="showScreen('screen-main')">← חזרה</button>
+        <div class="screen-title">משימות ותורנויות</div>
+        
+        <div id="admin-task-box" class="admin-panel hidden">
+            <h4>הוספת משימה חדשה לבני המשפחה:</h4>
+            <input type="text" id="new-task-text" class="input-box" placeholder="שם המשימה">
+            <select id="new-task-user" class="input-box">
+                <option value="אופק">אופק</option>
+                <option value="אבא">אבא</option>
+                <option value="אמא">אמא</option>
+                <option value="אח 1">אח 1</option>
+                <option value="אח 2">אח 2</option>
+                <option value="אחות 1">אחות 1</option>
+            </select>
+            <button class="action-btn" onclick="addNewTask()">הוסף משימה</button>
+        </div>
+
+        <div class="card">
+            <h3>משימות קבועות:</h3>
+            <p style="font-size: 13px; margin-top: 5px; color: #ddd;">• סידור חדר יומי<br>• הורדת זבל בערב</p>
+        </div>
+
+        <div class="card">
+            <h3>המשימות שלי (או מעקב מנהל):</h3>
+            <div id="tasks-list" style="margin-top: 8px;">טוען משימות...</div>
+        </div>
+    </div>
+
+    <!-- Screen 3: Rides -->
+    <div id="screen-rides" class="content-area hidden">
+        <button class="back-btn" onclick="showScreen('screen-main')">← חזרה</button>
+        <div class="screen-title">הנהג של מיס דייזי</div>
+        <div class="card">
+            <p>בקש הסעה משאר בני המשפחה:</p>
+            <input type="text" id="ride-input" class="input-box" placeholder="למשל: צריך הסעה מהים ב-18:30">
+            <button class="action-btn" onclick="requestRide()">פרסם בקשת הסעה</button>
+        </div>
+        <div class="card">
+            <h3>בקשות הסעה פתוחות:</h3>
+            <div id="rides-list" style="margin-top: 8px;">טוען בקשות...</div>
+        </div>
+    </div>
+
+    <!-- Screen 4: Daily Shopping -->
+    <div id="screen-shopping-daily" class="content-area hidden">
+        <button class="back-btn" onclick="showScreen('screen-main')">← חזרה</button>
+        <div class="screen-title">קניות להיום (יומי)</div>
+        <div class="card">
+            <input type="text" id="daily-shop-input" class="input-box" placeholder="הוסף מוצר דחוף להיום...">
+            <button class="action-btn" onclick="addShopItem('daily')">הוסף לרשימה היומית</button>
+        </div>
+        <div class="card">
+            <h3>מוצרים נדרשים להיום:</h3>
+            <div id="daily-shop-list" style="margin-top: 8px;">טוען נתונים...</div>
+            <button class="action-btn" style="background: #a93226; margin-top: 12px;" onclick="clearShopping('daily')">סיימתי קניות - אפס רשימה</button>
+        </div>
+    </div>
+
+    <!-- Screen 5: Weekly Shopping -->
+    <div id="screen-shopping-weekly" class="content-area hidden">
+        <button class="back-btn" onclick="showScreen('screen-main')">← חזרה</button>
+        <div class="screen-title">רשימת קניות שבועית</div>
+        <div class="card">
+            <input type="text" id="weekly-shop-input" class="input-box" placeholder="הוסף מוצר לרשימה השבועית...">
+            <button class="action-btn" onclick="addShopItem('weekly')">הוסף לרשימה השבועית</button>
+        </div>
+        <div class="card">
+            <h3>מוצרים לשבוע הקרוב:</h3>
+            <div id="weekly-shop-list" style="margin-top: 8px;">טוען נתונים...</div>
+            <button class="action-btn" style="background: #a93226; margin-top: 12px;" onclick="clearShopping('weekly')">סיימתי קניות - אפס רשימה</button>
+        </div>
+    </div>
+
+    <!-- Screen 6: Sandwiches -->
+    <div id="screen-food" class="content-area hidden">
+        <button class="back-btn" onclick="showScreen('screen-main')">← חזרה</button>
+        <div class="screen-title">סנדוויצ'ים להיום</div>
+        <div class="card">
+            <p>כמה סנדוויצ'ים אתה צריך להיום?</p>
+            <input type="number" id="sandwich-count" class="input-box" placeholder="מספר סנדוויצ'ים">
+            <button class="action-btn" onclick="saveSandwiches()">שמור כמות</button>
+        </div>
+        <div class="card">
+            <h3>סיכום סנדוויצ'ים במשפחה:</h3>
+            <div id="sandwiches-display" style="margin-top: 8px;">טוען נתונים...</div>
+        </div>
+    </div>
+
+    <!-- Screen 7: Daily Schedule -->
+    <div id="screen-schedule" class="content-area hidden">
+        <button class="back-btn" onclick="showScreen('screen-main')">← חזרה</button>
+        <div class="screen-title">לו"ז יומי משפחתי</div>
+        <div class="card">
+            <p>בחר תאריך לצפייה במיקום כולם:</p>
+            <input type="date" id="schedule-date" class="input-box" onchange="loadSchedule()">
+            
+            <div style="margin-top: 10px;">
+                <h4>הוסף את הפעילות שלך להיום:</h4>
+                <input type="text" id="sched-desc" class="input-box" placeholder="למשל: עבודה עד 16:00 / חוג ציור">
+                <button class="action-btn" onclick="saveMySchedule()">עדכן לו"ז שלי</button>
+            </div>
+        </div>
+        <div class="card">
+            <h3>איפה כל אחד בתאריך הנבחר?</h3>
+            <div id="schedule-results" style="margin-top: 8px;">בחר תאריך למעלה...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase & App Logic -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, deleteDoc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDVKAchSUnJIGHTb8ILx1KsdQPhJMEkAIU",
+        authDomain: "alone-at-home.firebaseapp.com",
+        projectId: "alone-at-home",
+        storageBucket: "alone-at-home.firebasestorage.app",
+        messagingSenderId: "33711939920",
+        appId: "1:33711939920:web:5f4fe370956fd7df59cc55",
+        measurementId: "G-EC4LR3JL7V"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // User Session management
+    let currentUser = localStorage.getItem('barmi_user') || "אופק";
+    document.getElementById('user-display').innerText = currentUser;
+    document.getElementById('welcome-msg').innerText = "שלום " + currentUser + "!";
+    if(currentUser === "אופק") {
+        document.getElementById('admin-task-box').classList.remove('hidden');
+    }
+
+    window.switchUser = function() {
+        let name = prompt("בחר משתמש:\nאופק, אבא, אמא, אח 1, אח 2, אחות 1", currentUser);
+        if(name) {
+            currentUser = name;
+            localStorage.setItem('barmi_user', currentUser);
+            document.getElementById('user-display').innerText = currentUser;
+            document.getElementById('welcome-msg').innerText = "שלום " + currentUser + "!";
+            if(currentUser === "אופק") {
+                document.getElementById('admin-task-box').classList.remove('hidden');
+            } else {
+                document.getElementById('admin-task-box').classList.add('hidden');
+            }
+        }
+    }
+
+    window.showScreen = function(screenId) {
+        document.querySelectorAll('.content-area').forEach(el => el.classList.add('hidden'));
+        document.getElementById(screenId).classList.remove('hidden');
+    }
+
+    // 1. Tasks Listener
+    onSnapshot(collection(db, "tasks"), (snapshot) => {
+        let html = "";
+        snapshot.forEach((docSnap) => {
+            let data = docSnap.data();
+            let docId = docSnap.id;
+            // Show only user's tasks, unless Admin (Ofek) who sees all
+            if(currentUser === "אופק" || data.assignedTo === currentUser) {
+                html += `<div class="item-row">
+                    <span><b>[${data.assignedTo}]</b> ${data.text}</span> 
+                    <span>
+                        ${data.done ? '✅ בוצע' : `<button onclick="toggleTask('${docId}', true)" style="background:#2e6930;color:white;border:none;padding:4px 8px;border-radius:5px;cursor:pointer;">סמן בוצע</button>`}
+                    </span>
+                </div>`;
+            }
+        });
+        document.getElementById('tasks-list').innerHTML = html || "אין מטלות כרגע.";
+    });
+
+    window.addNewTask = async function() {
+        const text = document.getElementById('new-task-text').value;
+        const assignedTo = document.getElementById('new-task-user').value;
+        if(!text) return alert('נא למלא את תוכן המשימה');
+        await addDoc(collection(db, "tasks"), { text, assignedTo, done: false });
+        document.getElementById('new-task-text').value = "";
+        alert('המשימה נוספה בהצלחה!');
+    }
+
+    window.toggleTask = async function(id, status) {
+        await updateDoc(doc(db, "tasks", id), { done: status });
+    }
+
+    // 2. Rides Listener
+    onSnapshot(collection(db, "rides"), (snapshot) => {
+        let html = "";
+        snapshot.forEach((docSnap) => {
+            let data = docSnap.data();
+            let docId = docSnap.id;
+            html += `<div class="item-row">
+                <span>🚗 ${data.message} (${data.status})</span>
+                ${data.status === 'ממתין לנהג' ? `<button onclick="takeRide('${docId}')" style="background:#2e6930;color:white;border:none;padding:4px 8px;border-radius:5px;cursor:pointer;">אני אקח!</button>` : '👍 נלקח'}
+            </div>`;
+        });
+        document.getElementById('rides-list').innerHTML = html || "אין בקשות הסעה פעילות.";
+    });
+
+    window.requestRide = async function() {
+        const message = document.getElementById('ride-input').value;
+        if(!message) return alert('נא לרשום את פרטי ההסעה');
+        await addDoc(collection(db, "rides"), { message, status: 'ממתין לנהג', requestedBy: currentUser });
+        document.getElementById('ride-input').value = "";
+        alert('בקשת ההסעה נשלחה!');
+    }
+
+    window.takeRide = async function(id) {
+        await updateDoc(doc(db, "rides", id), { status: `נלקח ע"י ${currentUser}` });
+    }
+
+    // 3. Shopping Listeners (Daily & Weekly)
+    onSnapshot(collection(db, "shopping_daily"), (snapshot) => {
+        let html = "";
+        snapshot.forEach((docSnap) => {
+            let data = docSnap.data();
+            html += `<div>• ${data.item}</div>`;
+        });
+        document.getElementById('daily-shop-list').innerHTML = html || "הרישיון להיום נקי.";
+    });
+
+    onSnapshot(collection(db, "shopping_weekly"), (snapshot) => {
+        let html = "";
+        snapshot.forEach((docSnap) => {
+            let data = docSnap.data();
+            html += `<div>• ${data.item}</div>`;
+        });
+        document.getElementById('weekly-shop-list').innerHTML = html || "אין מוצרים ברשימה השבועית.";
+    });
+
+    window.addShopItem = async function(type) {
+        const inputId = type === 'daily' ? 'daily-shop-input' : 'weekly-shop-input';
+        const val = document.getElementById(inputId).value;
+        if(!val) return alert('נא לרשום מוצר');
+        await addDoc(collection(db, type === 'daily' ? "shopping_daily" : "shopping_weekly"), { item: val });
+        document.getElementById(inputId).value = "";
+        alert('המוצר נוסף בהצלחה!');
+    }
+
+    window.clearShopping = async function(type) {
+        if(!confirm('האם אתה בטוח שסיימת קניות ולאפס את הרשימה?')) return;
+        const colName = type === 'daily' ? "shopping_daily" : "shopping_weekly";
+        const snapshot = await getDocs(collection(db, colName));
+        snapshot.forEach(async (d) => {
+            await deleteDoc(doc(db, colName, d.id));
+        });
+        alert('הרישיון אופס בהצלחה!');
+    }
+
+    // 4. Sandwiches
+    window.saveSandwiches = async function() {
+        const count = document.getElementById('sandwich-count').value;
+        if(count === "") return alert('נא לרשום כמות');
+        await setDoc(doc(db, "sandwiches", currentUser), { count: Number(count) });
+        alert('כמות הסנדוויצ׳ים נשמרה!');
+        loadSandwichesList();
+    }
+
+    async function loadSandwichesList() {
+        const snapshot = await getDocs(collection(db, "sandwiches"));
+        let html = "";
+        snapshot.forEach((docSnap) => {
+            let data = docSnap.data();
+            html += `<div><b>${docSnap.id}:</b> ${data.count} סנדוויצ'ים</div>`;
+        });
+        document.getElementById('sandwiches-display').innerHTML = html || "עוד לא הוגדרו כמויות להיום.";
+    }
+    loadSandwichesList();
+
+    // 5. Schedule per date
+    window.saveMySchedule = async function() {
+        const date = document.getElementById('schedule-date').value;
+        const desc = document.getElementById('sched-desc').value;
+        if(!date || !desc) return alert('נא לבחור תאריך ולרשום את הפעילות שלך');
+        await setDoc(doc(db, "schedules", `${date}_${currentUser}`), { user: currentUser, date, desc });
+        alert('הלו"ז עודכן בהצלחה!');
+        window.loadSchedule();
+    }
+
+    window.loadSchedule = async function() {
+        const date = document.getElementById('schedule-date').value;
+        if(!date) return;
+        const snapshot = await getDocs(collection(db, "schedules"));
+        let html = "";
+        snapshot.forEach((docSnap) => {
+            let data = docSnap.data();
+            if(data.date === date) {
+                html += `<div style="margin-bottom:6px;"><b>${data.user}:</b> ${data.desc}</div>`;
+            }
+        });
+        document.getElementById('schedule-results').innerHTML = html || "אין נתונים לתאריך זה.";
+    }
+</script>
+
+</body>
+</html>
